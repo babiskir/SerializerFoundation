@@ -1,7 +1,9 @@
 ﻿using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Unicode;
 
-namespace SerializationFramework.Tests.Mini;
+namespace SerializerFoundation.Tests.Mini;
 
 public interface IMiniSerializer
 {
@@ -16,9 +18,6 @@ public readonly record struct SerializationContext
 public readonly record struct DeserializationContext
 {
 }
-
-
-
 
 public interface IMiniSerializer<TWriteBuffer, TReadBuffer, T> : IMiniSerializer
     where TWriteBuffer : struct, IWriteBuffer, allows ref struct
@@ -182,7 +181,7 @@ public sealed class ArrayMiniSerializer<TWriteBuffer, TReadBuffer, TSerializer, 
         {
             // write to temporary buffer(segments) and copy to final array
             // requires copy-cost but important for safety.
-            using var builder = new SafeArrayBuilder<T>();
+            using var builder = new ArrayBuilder<T>();
 
             var segment = builder.GetNextSegment();
             var j = 0;
@@ -202,6 +201,66 @@ public sealed class ArrayMiniSerializer<TWriteBuffer, TReadBuffer, TSerializer, 
     }
 }
 
+public sealed class StringSerializer<TWriteBuffer, TReadBuffer> : IMiniSerializer<TWriteBuffer, TReadBuffer, string>
+    where TWriteBuffer : struct, IWriteBuffer, allows ref struct
+    where TReadBuffer : struct, IReadBuffer, allows ref struct
+{
+    public void Serialize(ref TWriteBuffer buffer, in string value, in SerializationContext serializationContext)
+    {
+        var str = value.AsSpan();
+
+        var maxByteCount = Encoding.UTF8.GetMaxByteCount(str.Length);
+        var dest = buffer.GetSpan(maxByteCount + 4); // 4 bytes for length prefix
+        var destHead = dest; // keep the head for length prefix write
+
+        var status = Utf8.FromUtf16(str, dest, out var bytesRead, out var charsWritten);
+        if (status != System.Buffers.OperationStatus.Done)
+        {
+            throw new InvalidOperationException();
+        }
+
+        BinaryPrimitives.WriteInt32LittleEndian(destHead, charsWritten);
+        buffer.Advance(charsWritten + 4);
+    }
+
+    public string Deserialize(ref TReadBuffer buffer, in DeserializationContext deserializationContext)
+    {
+        // read length
+        var span = buffer.GetSpan(4);
+        var length = BinaryPrimitives.ReadInt32LittleEndian(span);
+        buffer.Advance(4);
+
+        // for security reasons, limit the maximum length to avoid OOM
+        if (length < 512) // TODO: make configurable(in DeserializationContext)
+        {
+            var src = buffer.GetSpan(length)[..length];
+            return Encoding.UTF8.GetString(src);
+        }
+        else
+        {
+            // write to temporary buffer(segments) and copy to final array
+            // requires copy-cost but important for safety.
+            using var builder = new ArrayBuilder<char>();
+
+            var segment = builder.GetNextSegment();
+
+            var totalWritten = 0;
+
+            var src = buffer.GetSpan(0); // get current ensured buffer
+
+
+            var isFinalBlock = src.Length + totalWritten >= length;
+
+
+            var status = Utf8.ToUtf16(src, segment, out var bytesRead, out var bytesWritten, isFinalBlock);
+
+            // TODO: loop...
+
+
+            return builder.ToString(bytesWritten);
+        }
+    }
+}
 
 
 

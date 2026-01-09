@@ -1,14 +1,14 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 
-namespace SerializationFramework;
+namespace SerializerFoundation;
 
 // for security usecase
 // similar as SegmentedArrayBuilder in System.Linq(use in ToArray/ToList)
-public struct SafeArrayBuilder<T>(int expectedLength) : IDisposable
+public struct ArrayBuilder<T> : IDisposable
 {
-    Arrays segments;
-    int nextSegmentIndex;
+    internal Arrays segments;
+    internal int nextSegmentIndex;
 
     public Span<T> GetNextSegment()
     {
@@ -18,16 +18,11 @@ public struct SafeArrayBuilder<T>(int expectedLength) : IDisposable
         return newArray.AsSpan(0, segmentLength);
     }
 
-    public readonly T[] ToArray(int lastSegmentCount)
+    public T[] ToArray(int lastSegmentCount)
     {
-        var length = CalculateTotalLength(lastSegmentCount);
+        var length = GetLength(lastSegmentCount);
         if (length == 0)
         {
-            if (length != expectedLength)
-            {
-                throw new InvalidOperationException("The total length does not match the expected length.");
-            }
-
             return [];
         }
 
@@ -36,13 +31,8 @@ public struct SafeArrayBuilder<T>(int expectedLength) : IDisposable
         return array;
     }
 
-    public readonly void WriteTo(Span<T> destination, int lastSegmentCount)
+    public void WriteTo(Span<T> destination, int lastSegmentCount)
     {
-        if (destination.Length != expectedLength)
-        {
-            throw new InvalidOperationException("The total length does not match the expected length.");
-        }
-
         for (int i = 0; i < nextSegmentIndex - 1; i++)
         {
             var segmentLength = GetSegmentLength(i);
@@ -56,7 +46,7 @@ public struct SafeArrayBuilder<T>(int expectedLength) : IDisposable
         }
     }
 
-    public readonly int CalculateTotalLength(int lastSegmentCount)
+    public int GetLength(int lastSegmentCount)
     {
         return GetPreviousSegmentsTotal(nextSegmentIndex - 1) + lastSegmentCount;
     }
@@ -137,5 +127,24 @@ public struct SafeArrayBuilder<T>(int expectedLength) : IDisposable
     internal struct Arrays
     {
         public T[]? values;
+    }
+}
+
+public static class ArrayBuilderExtensions
+{
+    extension(ArrayBuilder<char> arrayBuilder)
+    {
+        public string ToString(int lastSegmentCount)
+        {
+            if (arrayBuilder.nextSegmentIndex == 0) return "";
+
+            var length = arrayBuilder.GetLength(lastSegmentCount);
+            if (length == 0) return "";
+
+            return string.Create(length, (self: arrayBuilder, lastSegmentCount), static (span, state) =>
+            {
+                state.self.WriteTo(span, state.lastSegmentCount);
+            });
+        }
     }
 }

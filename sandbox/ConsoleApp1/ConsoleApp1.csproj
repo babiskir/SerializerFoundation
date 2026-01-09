@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SerializationFramework\SerializationFramework.csproj" />
+    <ProjectReference Include="..\..\src\SerializerFoundation\SerializerFoundation.csproj" />
   </ItemGroup>
 
 </Project>

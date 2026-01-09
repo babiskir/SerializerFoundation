@@ -15,9 +15,9 @@
     <Project Path="sandbox/ConsoleApp1/ConsoleApp1.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/SerializationFramework/SerializationFramework.csproj" />
+    <Project Path="src/SerializerFoundation/SerializerFoundation.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/SerializationFramework.Tests/SerializationFramework.Tests.csproj" />
+    <Project Path="tests/SerializerFoundation.Tests/SerializerFoundation.Tests.csproj" />
   </Folder>
 </Solution>

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Text;
 
-namespace SerializationFramework;
+namespace SerializerFoundation;
 
 // TODO: not implemented
 

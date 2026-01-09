@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace SerializationFramework;
+namespace SerializerFoundation;
 
 public interface IWriteBuffer
 {

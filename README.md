@@ -1,4 +1,4 @@
-# SerializationFramework
+# SerializerFoundation
 
 High performance serialization infrastructure for C#.
 

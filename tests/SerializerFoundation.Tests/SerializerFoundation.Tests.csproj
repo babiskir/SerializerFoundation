@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,10 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="TUnit" Version="1.9.17" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\SerializationFramework\SerializationFramework.csproj" />
+    <ProjectReference Include="..\..\src\SerializerFoundation\SerializerFoundation.csproj" />
   </ItemGroup>
 
 </Project>

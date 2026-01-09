@@ -1,6 +1,6 @@
-﻿using SerializationFramework.Tests.Mini;
+﻿using SerializerFoundation.Tests.Mini;
 
-namespace SerializationFramework.Tests;
+namespace SerializerFoundation.Tests;
 
 public static partial class MiniSerializer
 {

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace SerializationFramework.Tests;
+namespace SerializerFoundation.Tests;
 
 public static class AssertUtils
 {

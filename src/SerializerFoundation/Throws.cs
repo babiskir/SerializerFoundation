@@ -1,77 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SerializationFramework;
+namespace SerializerFoundation;
 
-public ref struct FixedSpanBuffer : IWriteBuffer
+internal static class Throws
 {
-    Span<byte> buffer;
-    int written;
-
-    public long WrittenCount => written;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public FixedSpanBuffer(Span<byte> buffer)
-    {
-        this.buffer = buffer;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Span<byte> GetSpan(int byteCount)
-    {
-        if (buffer.Length < byteCount)
-        {
-            Throws.InsufficientSpaceInBuffer();
-        }
-
-        return buffer;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Advance(int bytesConsumed)
-    {
-        buffer = buffer.Slice(bytesConsumed);
-        written += bytesConsumed;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Flush()
-    {
-        // No-op for SpanBuffer
-    }
+    [DoesNotReturn]
+    internal static void InsufficientSpaceInBuffer() => throw new InvalidOperationException("Insufficient space in buffer.");
 }
-
-//public ref struct BufferWriterWriteBuffer(IBufferWriter<byte> bufferWriter) : IWriteBuffer
-//{
-//    Span<byte> span;
-//    int written;
-
-//    public Span<byte> GetSpan(int byteCount)
-//    {
-//        if (span.Length < byteCount)
-//        {
-//            bufferWriter.Advance(written);
-//            span = bufferWriter.GetSpan(byteCount);
-//            // TODO: check span length.
-//        }
-
-//        return span;
-//    }
-
-//    public void Advance(int bytesConsumed)
-//    {
-//        span = span.Slice(bytesConsumed);
-//        written += bytesConsumed;
-//    }
-
-//    public void Flush()
-//    {
-//        if (written == 0) return;
-
-//        bufferWriter.Advance(written);
-//        span = default;
-//        written = 0;
-//    }
-//}
 
 
 
