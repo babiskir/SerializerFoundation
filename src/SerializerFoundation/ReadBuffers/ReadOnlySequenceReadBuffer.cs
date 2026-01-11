@@ -1,6 +1,6 @@
 ﻿namespace SerializerFoundation;
 
-public ref struct ReadOnlySequenceReadBuffer : IReadBuffer, IDisposable
+public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
 {
     // Slicing a ReadOnlySequence is slow
     // so avoid it as much as possible and use Span instead.
@@ -27,6 +27,17 @@ public ref struct ReadOnlySequenceReadBuffer : IReadBuffer, IDisposable
         }
 
         return currentSpan;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref readonly byte GetReference(int sizeHint = 0)
+    {
+        if (currentSpan.Length == 0 || (uint)currentSpan.Length < (uint)sizeHint)
+        {
+            return ref MemoryMarshal.GetReference(GetSpanSlow(sizeHint));
+        }
+
+        return ref MemoryMarshal.GetReference(currentSpan);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

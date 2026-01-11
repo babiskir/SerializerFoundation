@@ -10,6 +10,7 @@
   <ItemGroup>
     <Using Include="System.Buffers" />
     <Using Include="System.Runtime.CompilerServices" />
+    <Using Include="System.Runtime.InteropServices" />
   </ItemGroup>
 
 </Project>

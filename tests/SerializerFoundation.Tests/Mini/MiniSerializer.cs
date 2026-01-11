@@ -20,8 +20,14 @@ public readonly record struct DeserializationContext
 }
 
 public interface IMiniSerializer<TWriteBuffer, TReadBuffer, T> : IMiniSerializer
-    where TWriteBuffer : struct, IWriteBuffer, allows ref struct
-    where TReadBuffer : struct, IReadBuffer, allows ref struct
+    where TWriteBuffer : struct, IWriteBuffer
+#if NET9_0_OR_GREATER
+    , allows ref struct
+#endif
+    where TReadBuffer : struct, IReadBuffer
+#if NET9_0_OR_GREATER
+    , allows ref struct
+#endif
 {
     void Serialize(ref TWriteBuffer buffer, in T value, in SerializationContext serializationContext);
     T Deserialize(ref TReadBuffer buffer, in DeserializationContext deserializationContext);

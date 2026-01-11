@@ -1,7 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿namespace SerializerFoundation;
 
-namespace SerializerFoundation;
-
+// TODO: non ref version of ArrayPoolWriteBuffer
 public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
 {
     PooledArrays pooledArrays;
@@ -52,6 +51,18 @@ public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
         return GetSpanSlow(sizeHint);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte GetReference(int sizeHint = 0)
+    {
+        var len = currentBuffer.Length - currentWritten;
+        if (sizeHint > 0 && len >= sizeHint)
+        {
+            return ref Unsafe.Add(ref MemoryMarshal.GetReference(currentBuffer), currentWritten);
+        }
+
+        return ref MemoryMarshal.GetReference(GetSpanSlow(sizeHint));
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     Span<byte> GetSpanSlow(int sizeHint)
     {
@@ -79,10 +90,6 @@ public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
     public void Advance(int bytesWritten)
     {
         currentWritten += bytesWritten;
-    }
-
-    public void Flush()
-    {
     }
 
     public byte[] ToArray()

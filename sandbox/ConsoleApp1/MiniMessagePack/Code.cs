@@ -25,7 +25,7 @@ public class IntMessagePackSerialzier<TWriteBuffer, TReadBuffer> : IMessagePackS
 {
     public void Serialize(ref TWriteBuffer buffer, ref int value)
     {
-        ref var reference = ref buffer.GetSpanReference(8);
+        ref var reference = ref buffer.GetReference(8);
         var written = MessagePackPrimitives.UnsafeWriteInt32(ref reference, value);
         buffer.Advance(written);
     }

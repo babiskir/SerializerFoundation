@@ -1,12 +1,19 @@
 ﻿
 
 using SerializerFoundation;
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Runtime.CompilerServices;
 
-Span<byte> scratch = stackalloc byte[1024];
-var buffer = new ArrayPoolWriteBuffer(scratch);
 
-var span1 = buffer.GetSpan(1_073_741_824);
-buffer.Advance(1);
+Stream stream = new MemoryStream();
+var pipeWriter = PipeWriter.Create(stream);
 
-var span2 = buffer.GetSpan(1_073_741_824);
-buffer.Advance(1);
+
+var writeBuffer = new PipeWriterAsyncWriteBuffer(pipeWriter);
+
+
+ref byte p = ref Unsafe.NullRef<byte>();
+writeBuffer.TryGetReference(4, ref p);
+
+

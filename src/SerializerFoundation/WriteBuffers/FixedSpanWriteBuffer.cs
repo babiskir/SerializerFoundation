@@ -1,7 +1,4 @@
-﻿using System.IO.Pipelines;
-using System.Text.Json;
-
-namespace SerializerFoundation;
+﻿namespace SerializerFoundation;
 
 public ref struct FixedSpanWriteBuffer : IWriteBuffer
 {
@@ -27,15 +24,24 @@ public ref struct FixedSpanWriteBuffer : IWriteBuffer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref byte GetReference(int sizeHint = 0)
+    {
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
+        {
+            Throws.InsufficientSpaceInBuffer();
+        }
+
+        return ref MemoryMarshal.GetReference(buffer);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Advance(int bytesWritten)
     {
         buffer = buffer.Slice(bytesWritten);
         written += bytesWritten;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Flush()
+    public void Dispose()
     {
-        // No-op for SpanBuffer
     }
 }

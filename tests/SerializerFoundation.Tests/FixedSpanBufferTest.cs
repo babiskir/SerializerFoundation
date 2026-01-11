@@ -11,10 +11,14 @@ public static partial class MiniSerializer
 
         Span<byte> buffer = new byte[65536];
         var writeBuffer = new FixedSpanWriteBuffer(buffer);
-
-        serializer.Serialize(ref writeBuffer, value, default);
-
-        writeBuffer.Flush();
+        try
+        {
+            serializer.Serialize(ref writeBuffer, value, default);
+        }
+        finally
+        {
+            writeBuffer.Dispose();
+        }
 
         return buffer.Slice(0, (int)writeBuffer.BytesWritten).ToArray();
     }
@@ -51,8 +55,6 @@ public class FixedSpanBufferTest
         span.Length.IsEqualTo(92);
         buffer.Advance(92);
         buffer.BytesWritten.IsEqualTo(100);
-
-        buffer.Flush(); // no-op
 
         try
         {
