@@ -1,16 +1,23 @@
-﻿namespace SerializerFoundation;
+﻿using System.Collections.ObjectModel;
+
+namespace SerializerFoundation;
+
+// non ref-struct variation -> PointerReadBuffer
 
 public ref struct ReadOnlySpanReadBuffer : IReadBuffer
 {
     ReadOnlySpan<byte> buffer;
     int consumed = 0;
+    readonly int length = 0;
 
     public long BytesConsumed => consumed;
+    public long BytesRemaining => length - consumed;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpanReadBuffer(ReadOnlySpan<byte> buffer)
     {
         this.buffer = buffer;
+        this.length = buffer.Length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,14 +57,17 @@ public ref struct ReadOnlySpanReadBuffer : IReadBuffer
 public unsafe struct PointerReadBuffer : IReadBuffer
 {
     PointerSpan buffer;
-    int consumed = 0;
+    int consumed;
+    readonly int length;
 
     public long BytesConsumed => consumed;
+    public long BytesRemaining => length - consumed;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public PointerReadBuffer(byte* buffer, int length)
     {
         this.buffer = new(buffer, length);
+        this.length = length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

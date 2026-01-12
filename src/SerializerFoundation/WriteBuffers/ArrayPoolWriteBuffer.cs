@@ -1,6 +1,6 @@
 ﻿namespace SerializerFoundation;
 
-// TODO: non ref version of ArrayPoolWriteBuffer
+// TODO: non ref-struct variation -> ??? TODO: impl
 #if !NETSTANDARD2_0
 
 public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable

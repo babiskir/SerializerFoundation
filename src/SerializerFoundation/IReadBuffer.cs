@@ -16,6 +16,7 @@ public interface IReadBuffer : IDisposable
 
     void Advance(int bytesConsumed);
     long BytesConsumed { get; }
+    long BytesRemaining { get; }
 }
 
 public static class ReadBufferExtensions

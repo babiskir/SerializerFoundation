@@ -2,6 +2,8 @@
 
 #if NET9_0_OR_GREATER
 
+// non ref-struct variation -> InterfaceBufferWriterWriteBuffer
+
 public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
     where TBufferWriter : IBufferWriter<byte>
 {
@@ -79,7 +81,6 @@ public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
 
 #endif
 
-// non-ref struct
 public struct InterfaceBufferWriterWriteBuffer : IWriteBuffer
 {
     IBufferWriter<byte> bufferWriter;

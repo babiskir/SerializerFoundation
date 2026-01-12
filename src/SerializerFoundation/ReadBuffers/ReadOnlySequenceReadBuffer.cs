@@ -1,6 +1,6 @@
 ﻿namespace SerializerFoundation;
 
-// TODO: non-ref struct version
+// TODO: // non ref-struct variation -> ???
 
 public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
 {
@@ -10,14 +10,17 @@ public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
     ReadOnlySpan<byte> currentSpan;
     byte[]? tempBuffer;
     long consumed;
+    readonly long length;
 
     public long BytesConsumed => consumed;
+    public long BytesRemaining => consumed - length;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySequenceReadBuffer(in ReadOnlySequence<byte> sequence)
     {
         this.sequence = sequence;
         this.currentSpan = sequence.FirstSpan;
+        this.length = sequence.Length;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using System.Buffers;
+using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Unicode;
@@ -24,6 +25,11 @@ public readonly record struct AsyncSerializationContext
     public readonly CancellationToken CancellationToken { get; init; }
 }
 
+public readonly record struct AsyncDeserializationContext
+{
+    public readonly CancellationToken CancellationToken { get; init; }
+}
+
 public interface IMiniSerializer<TWriteBuffer, TReadBuffer, T> : IMiniSerializer
     where TWriteBuffer : struct, IWriteBuffer
 #if NET9_0_OR_GREATER
@@ -38,11 +44,34 @@ public interface IMiniSerializer<TWriteBuffer, TReadBuffer, T> : IMiniSerializer
     T Deserialize(ref TReadBuffer buffer, in DeserializationContext deserializationContext);
 }
 
-public interface IAsyncMiniSerializer<TAsyncWriteBuffer, T>
+public interface IAsyncMiniSerializer_NotAdopted<TAsyncWriteBuffer, T>
     where TAsyncWriteBuffer : IAsyncWriteBuffer
 {
+    // is slow
     ValueTask SerializeAsync(TAsyncWriteBuffer buffer, T value, AsyncSerializationContext serializationContext);
 }
+
+public enum SerializeStatus
+{
+    Done,
+    DestinationTooSmall,
+}
+
+public enum DeserializeStatus
+{
+    Done,
+    NeedMoreData
+}
+
+public interface IAsyncMiniSerializer<TAsyncWriteBuffer, TAsyncReadBuffer, T>
+    where TAsyncWriteBuffer : class, IAsyncWriteBuffer
+    where TAsyncReadBuffer : class, IAsyncReadBuffer
+{
+    // AsyncSerializationContext must have resumable state
+    SerializeStatus TrySerialize(TAsyncWriteBuffer buffer, in T value, in AsyncSerializationContext serializationContext, out int sizeHint);
+    DeserializeStatus TryDeserialize(TAsyncReadBuffer buffer, out T value, in AsyncDeserializationContext deserializationContext, out int sizeHint);
+}
+
 
 
 public static class MiniSerializerExtensions
@@ -157,7 +186,7 @@ public sealed class IntMiniSerializer<TWriteBuffer, TReadBuffer> : IMiniSerializ
     }
 }
 
-public sealed class IntAsyncMiniSerializer<TAsyncWriteBuffer> : IAsyncMiniSerializer<TAsyncWriteBuffer, int>
+public sealed class IntAsyncMiniSerializer<TAsyncWriteBuffer> : IAsyncMiniSerializer_NotAdopted<TAsyncWriteBuffer, int>
     where TAsyncWriteBuffer : IAsyncWriteBuffer
 {
     public static readonly IntAsyncMiniSerializer<TAsyncWriteBuffer> Default = new();
