@@ -146,7 +146,7 @@ public static class ArrayBuilderExtensions
             if (length == 0) return "";
 
             // avoid string.Create(Func) struct copy-cost.
-            var str = string.Create(length, (object?)null, static (_, _) => { });
+            var str = string.FastAllocateString(length);
             unsafe
             {
                 fixed (char* destPointer = str.AsSpan())

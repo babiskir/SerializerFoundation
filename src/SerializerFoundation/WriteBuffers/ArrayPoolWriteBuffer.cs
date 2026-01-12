@@ -1,6 +1,8 @@
 ﻿namespace SerializerFoundation;
 
 // TODO: non ref version of ArrayPoolWriteBuffer
+#if !NETSTANDARD2_0
+
 public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
 {
     PooledArrays pooledArrays;
@@ -212,3 +214,5 @@ public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
 
 #endif
 }
+
+#endif

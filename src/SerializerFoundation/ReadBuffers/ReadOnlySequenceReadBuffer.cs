@@ -1,5 +1,7 @@
 ﻿namespace SerializerFoundation;
 
+// TODO: non-ref struct version
+
 public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
 {
     // Slicing a ReadOnlySequence is slow

@@ -15,4 +15,5 @@
     <ProjectReference Include="..\..\src\SerializerFoundation\SerializerFoundation.csproj" />
   </ItemGroup>
 
+
 </Project>
