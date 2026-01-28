@@ -2,7 +2,7 @@
 
 namespace SerializerFoundation;
 
-public sealed class PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
+public struct PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
 {
     PipeWriter pipeWriter;
     PointerSpan buffer;

@@ -1,13 +1,13 @@
-﻿namespace SerializerFoundation;
+﻿using System;
+
+namespace SerializerFoundation;
 
 #if NET9_0_OR_GREATER
-
-// non ref-struct variation -> InterfaceBufferWriterWriteBuffer
 
 public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
     where TBufferWriter : IBufferWriter<byte>
 {
-    ref TBufferWriter bufferWriter; // allow mutable struct buffer writers
+    ref TBufferWriter bufferWriter; // allow mutable struct buffer writers(only .NET 9 ore greater)
     Span<byte> buffer;
     int writtenInBuffer;
     long totalWritten;
@@ -81,7 +81,7 @@ public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
 
 #endif
 
-public struct InterfaceBufferWriterWriteBuffer : IWriteBuffer
+public struct NonRefBufferWriterWriteBuffer : IWriteBuffer
 {
     IBufferWriter<byte> bufferWriter;
     PointerSpan buffer;
@@ -92,7 +92,7 @@ public struct InterfaceBufferWriterWriteBuffer : IWriteBuffer
     public long BytesWritten => totalWritten;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public InterfaceBufferWriterWriteBuffer(IBufferWriter<byte> bufferWriter)
+    public NonRefBufferWriterWriteBuffer(IBufferWriter<byte> bufferWriter)
     {
         this.bufferWriter = bufferWriter;
     }
@@ -165,6 +165,7 @@ public struct InterfaceBufferWriterWriteBuffer : IWriteBuffer
         }
         finally
         {
+            buffer = default;
             bufferHandle.Dispose();
         }
     }

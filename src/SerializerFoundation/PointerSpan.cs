@@ -12,7 +12,7 @@ internal unsafe struct PointerSpan
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => length;
     }
-     
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public PointerSpan(byte* pointer, int length)
     {
@@ -58,5 +58,11 @@ internal unsafe struct PointerSpan
 
         this.pointer = pointer + start;
         this.length = length - start;
+    }
+
+    internal ReadOnlySpan<byte> GetRewindedSpan(int rewindLength)
+    {
+        var p = this.pointer - rewindLength;
+        return new ReadOnlySpan<byte>(p, rewindLength);
     }
 }
