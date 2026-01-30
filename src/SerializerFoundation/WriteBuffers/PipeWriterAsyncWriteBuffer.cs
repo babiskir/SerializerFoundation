@@ -17,10 +17,10 @@ public struct PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
         this.pipeWriter = pipeWriter;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetSpan(int sizeHint, out Span<byte> span)
     {
-        // TODO: when sizeHint is zero
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             span = default;
             return false;
@@ -30,9 +30,10 @@ public struct PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetReference(int sizeHint, ref byte reference)
     {
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             return false;
         }
@@ -41,6 +42,7 @@ public struct PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Advance(int bytesWritten)
     {
         buffer.Advance(bytesWritten);
@@ -69,25 +71,30 @@ public struct PipeWriterAsyncWriteBuffer : IAsyncWriteBuffer
 
     public async ValueTask DisposeAsync()
     {
-        if (writtenInBuffer > 0)
+        try
         {
-            await pipeWriter.FlushAsync(CancellationToken.None);
+            if (writtenInBuffer > 0)
+            {
+                pipeWriter.Advance(writtenInBuffer);
+                await pipeWriter.FlushAsync(CancellationToken.None);
+            }
+        }
+        finally
+        {
+            buffer = default;
             writtenInBuffer = 0;
+            bufferHandle.Dispose();
         }
     }
 
     public async ValueTask FlushAsync(CancellationToken cancellationToken)
     {
-        try
+        if (writtenInBuffer > 0)
         {
-            if (writtenInBuffer > 0)
-            {
-                await pipeWriter.FlushAsync(cancellationToken);
-                writtenInBuffer = 0;
-            }
-        }
-        finally
-        {
+            pipeWriter.Advance(writtenInBuffer);
+            await pipeWriter.FlushAsync(cancellationToken);
+            buffer = default;
+            writtenInBuffer = 0;
             bufferHandle.Dispose();
         }
     }

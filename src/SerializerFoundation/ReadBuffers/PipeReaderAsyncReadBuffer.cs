@@ -19,10 +19,10 @@ public struct PipeReaderAsyncReadBuffer : IAsyncReadBuffer
         this.pipeReader = pipeReader;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetSpan(int sizeHint, out ReadOnlySpan<byte> span)
     {
-        // TODO: when sizeHint is zero
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             span = default;
             return false;
@@ -32,9 +32,10 @@ public struct PipeReaderAsyncReadBuffer : IAsyncReadBuffer
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetReference(int sizeHint, ref byte reference)
     {
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             return false;
         }
@@ -43,6 +44,7 @@ public struct PipeReaderAsyncReadBuffer : IAsyncReadBuffer
         return true;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Advance(int bytesConsumed)
     {
         buffer.Advance(bytesConsumed);
@@ -60,21 +62,24 @@ public struct PipeReaderAsyncReadBuffer : IAsyncReadBuffer
             readInBuffer = 0;
         }
 
-        var readResult = await pipeReader.ReadAtLeastAsync(sizeHint, cancellationToken);
-        // TODO: check IsCompleted and result's length satisfy sizeHint?
+        if (sizeHint <= 0) sizeHint = 1; // minimum 1 byte
 
-        sequence = readResult.Buffer;
-        var memory = sequence.First;
+        var readResult = await pipeReader.ReadAtLeastAsync(sizeHint, cancellationToken);
+        var buffer = readResult.Buffer;
+
+        sequence = buffer;
+        var memory = buffer.First;
 
         if ((uint)memory.Length < (uint)sizeHint)
         {
-            if ((uint)sequence.Length < (uint)sizeHint)
+            // ReadAtLeast may return less than minimumSize when the end of the stream is reached.
+            if ((uint)buffer.Length < (uint)sizeHint)
             {
                 Throws.InsufficientSpaceInBuffer();
             }
 
             tempBuffer = ArrayPool<byte>.Shared.Rent(sizeHint);
-            sequence.Slice(0, sizeHint).CopyTo(tempBuffer);
+            buffer.Slice(0, sizeHint).CopyTo(tempBuffer);
             SetSpan(tempBuffer.AsMemory(0, sizeHint));
         }
         else

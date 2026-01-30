@@ -58,6 +58,8 @@ public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
             currentSpan = sequence.FirstSpan;
         }
 
+        if (sizeHint <= 0) sizeHint = 1; // minimum 1 byte
+
         // if still not enough, copy to temp buffer
         if ((uint)currentSpan.Length < (uint)sizeHint)
         {
@@ -181,6 +183,8 @@ public unsafe struct NonRefReadOnlySequenceReadBuffer : IReadBuffer
             currentSpanHandle.Dispose();
             SetSpan(sequence.First);
         }
+        
+        if (sizeHint <= 0) sizeHint = 1; // minimum 1 byte
 
         // if still not enough, copy to temp buffer
         if ((uint)currentSpan.Length < (uint)sizeHint)

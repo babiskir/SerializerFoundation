@@ -141,7 +141,7 @@ public ref struct ArrayPoolWriteBuffer : IWriteBuffer, IDisposable
         }
         pooledCount = 0;
         currentWritten = 0;
-        currentBuffer = scratchBuffer;
+        currentBuffer = default;
     }
 
     // Segment sizes grow exponentially from 64KB to 1GB.
@@ -351,7 +351,8 @@ public unsafe struct NonRefArrayPoolWriteBuffer : IWriteBuffer, IDisposable
         }
         pooledCount = 0;
         currentWritten = 0;
-        currentBuffer = scratchBuffer;
+        currentBuffer = default;
+        currentBufferHandle.Dispose();
     }
 
     // Segment sizes grow exponentially from 64KB to 1GB.

@@ -23,8 +23,7 @@ public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Span<byte> GetSpan(int sizeHint = 0)
     {
-        // TODO: when sizeHint is zero
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             EnsureNewBuffer(sizeHint);
         }
@@ -35,7 +34,7 @@ public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref byte GetReference(int sizeHint = 0)
     {
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             EnsureNewBuffer(sizeHint);
         }
@@ -67,7 +66,7 @@ public ref struct BufferWriterWriteBuffer<TBufferWriter> : IWriteBuffer
         buffer = bufferWriter.GetSpan(sizeHint);
 
         // validate IBufferWriter contract
-        if (buffer.Length < sizeHint)
+        if (buffer.Length == 0 || buffer.Length < sizeHint)
         {
             Throws.InsufficientSpaceInBuffer();
         }
@@ -100,7 +99,7 @@ public struct NonRefBufferWriterWriteBuffer : IWriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Span<byte> GetSpan(int sizeHint = 0)
     {
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             EnsureNewBuffer(sizeHint);
         }
@@ -111,7 +110,7 @@ public struct NonRefBufferWriterWriteBuffer : IWriteBuffer
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref byte GetReference(int sizeHint = 0)
     {
-        if ((uint)buffer.Length < (uint)sizeHint)
+        if (buffer.Length == 0 || (uint)buffer.Length < (uint)sizeHint)
         {
             EnsureNewBuffer(sizeHint);
         }
@@ -151,7 +150,7 @@ public struct NonRefBufferWriterWriteBuffer : IWriteBuffer
         }
 
         // validate IBufferWriter contract
-        if (buffer.Length < sizeHint)
+        if (buffer.Length == 0 || buffer.Length < sizeHint)
         {
             Throws.InsufficientSpaceInBuffer();
         }
