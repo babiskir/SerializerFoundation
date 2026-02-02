@@ -179,4 +179,169 @@ public class FixedSpanBufferTest
             await Assert.That(actual).IsEquivalentTo(expected);
         }
     }
+
+    [Test]
+    public async Task GetReference_Basic()
+    {
+        var bytes = new byte[100];
+        var buffer = new FixedSpanWriteBuffer(bytes);
+
+        ref byte reference = ref buffer.GetReference(1);
+        reference = 0xAB;
+        buffer.Advance(1);
+        
+        AssertUtils.IsEqualTo(bytes[0], (byte)0xAB);
+        AssertUtils.IsEqualTo(buffer.BytesWritten, 1);
+    }
+
+    [Test]
+    public async Task GetReference_ThrowsWhenInsufficientSpace()
+    {
+        var bytes = new byte[10];
+        var buffer = new FixedSpanWriteBuffer(bytes);
+        buffer.Advance(10);
+
+        try
+        {
+            buffer.GetReference(1);
+            Assert.Fail("Expected exception was not thrown.");
+        }
+        catch (Exception ex)
+        {
+            await Assert.That(ex).IsTypeOf<InvalidOperationException>();
+        }
+    }
+
+    [Test]
+    public async Task GetSpan_WithZeroSizeHint_ReturnsRemainingBuffer()
+    {
+        var bytes = new byte[100];
+        var buffer = new FixedSpanWriteBuffer(bytes);
+        buffer.Advance(30);
+
+        var span = buffer.GetSpan(0);
+        await Assert.That(span.Length).IsEqualTo(70);
+    }
+
+    [Test]
+    public async Task EmptyBuffer_ThrowsOnGetSpan()
+    {
+        var bytes = Array.Empty<byte>();
+        var buffer = new FixedSpanWriteBuffer(bytes);
+
+        try
+        {
+            buffer.GetSpan();
+            Assert.Fail("Expected exception was not thrown.");
+        }
+        catch (Exception ex)
+        {
+            await Assert.That(ex).IsTypeOf<InvalidOperationException>();
+        }
+    }
+
+    [Test]
+    public async Task EmptyBuffer_ThrowsOnGetReference()
+    {
+        var bytes = Array.Empty<byte>();
+        var buffer = new FixedSpanWriteBuffer(bytes);
+
+        try
+        {
+            buffer.GetReference();
+            Assert.Fail("Expected exception was not thrown.");
+        }
+        catch (Exception ex)
+        {
+            await Assert.That(ex).IsTypeOf<InvalidOperationException>();
+        }
+    }
+
+    [Test]
+    public async Task BytesWritten_InitiallyZero()
+    {
+        var bytes = new byte[100];
+        var buffer = new FixedSpanWriteBuffer(bytes);
+        await Assert.That(buffer.BytesWritten).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task FlushAndDispose_DoNotThrow()
+    {
+        var bytes = new byte[100];
+        var buffer = new FixedSpanWriteBuffer(bytes);
+        buffer.GetSpan(10);
+        buffer.Advance(10);
+
+        buffer.Flush();
+        buffer.Dispose();
+
+        await Assert.That(buffer.BytesWritten).IsEqualTo(10);
+    }
+
+    [Test]
+    public void FixedPointerWriteBuffer_Basic()
+    {
+        var bytes = new byte[100];
+        unsafe
+        {
+            fixed (byte* ptr = bytes)
+            {
+                var buffer = new FixedPointerWriteBuffer(ptr, 100);
+
+                var span = buffer.GetSpan(10);
+                span.Length.IsEqualTo(100);
+
+                buffer.Advance(10);
+                buffer.BytesWritten.IsEqualTo(10);
+
+                span = buffer.GetSpan(90);
+                span.Length.IsEqualTo(90);
+            }
+        }
+    }
+
+    [Test]
+    public void FixedPointerWriteBuffer_GetReference()
+    {
+        var bytes = new byte[100];
+        unsafe
+        {
+            fixed (byte* ptr = bytes)
+            {
+                var buffer = new FixedPointerWriteBuffer(ptr, 100);
+
+                ref byte reference = ref buffer.GetReference(1);
+                reference = 0xCD;
+                buffer.Advance(1);
+            }
+        }
+
+        bytes[0].IsEqualTo((byte)0xCD);
+    }
+
+    [Test]
+    public void FixedPointerWriteBuffer_ThrowsWhenInsufficientSpace()
+    {
+        var bytes = new byte[10];
+        unsafe
+        {
+            fixed (byte* ptr = bytes)
+            {
+                var buffer = new FixedPointerWriteBuffer(ptr, 10);
+                buffer.Advance(10);
+
+                var throwed = false;
+                try
+                {
+                    buffer.GetSpan(1);
+                }
+                catch (InvalidOperationException)
+                {
+                    throwed = true;
+                }
+                throwed.IsEqualTo(true);
+            }
+        }
+    }
 }

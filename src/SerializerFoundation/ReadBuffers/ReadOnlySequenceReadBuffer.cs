@@ -11,7 +11,7 @@ public ref struct ReadOnlySequenceReadBuffer : IReadBuffer
     readonly long length;
 
     public long BytesConsumed => consumed;
-    public long BytesRemaining => consumed - length;
+    public long BytesRemaining => length - consumed;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySequenceReadBuffer(in ReadOnlySequence<byte> sequence)
@@ -126,7 +126,7 @@ public unsafe struct NonRefReadOnlySequenceReadBuffer : IReadBuffer
     readonly long length;
 
     public long BytesConsumed => consumed;
-    public long BytesRemaining => consumed - length;
+    public long BytesRemaining => length - consumed;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public NonRefReadOnlySequenceReadBuffer(in ReadOnlySequence<byte> sequence)
@@ -183,7 +183,7 @@ public unsafe struct NonRefReadOnlySequenceReadBuffer : IReadBuffer
             currentSpanHandle.Dispose();
             SetSpan(sequence.First);
         }
-        
+
         if (sizeHint <= 0) sizeHint = 1; // minimum 1 byte
 
         // if still not enough, copy to temp buffer
