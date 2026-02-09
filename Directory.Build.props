@@ -6,7 +6,7 @@
     <Authors>Cysharp</Authors>
     <Company>Cysharp</Company>
     <Copyright>© Cysharp, Inc.</Copyright>
-    <PackageProjectUrl>https://github.com/Cysharp/SerializationFramework</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Cysharp/SerializerFoundation</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
