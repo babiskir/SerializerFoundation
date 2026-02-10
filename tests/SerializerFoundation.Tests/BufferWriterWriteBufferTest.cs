@@ -132,7 +132,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task Basic_WriteAndAdvance()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
         try
         {
             var span = buffer.GetSpan(10);
@@ -151,7 +151,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task GetReference_Basic()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
         try
         {
             ref byte reference = ref buffer.GetReference(1);
@@ -170,7 +170,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task BytesWritten_InitiallyZero()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
         try
         {
             await Assert.That(buffer.BytesWritten).IsEqualTo(0);
@@ -185,7 +185,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task Flush_AdvancesUnderlyingWriter()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
 
         var span = buffer.GetSpan(4);
         span[0] = 1;
@@ -205,7 +205,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task Dispose_FlushesAutomatically()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
 
         var span = buffer.GetSpan(4);
         span[0] = 10;
@@ -224,7 +224,7 @@ public class NonRefBufferWriterWriteBufferTest
     public async Task MultipleWrites()
     {
         var writer = new ArrayBufferWriter<byte>();
-        var buffer = new NonRefBufferWriterWriteBuffer(writer);
+        var buffer = new NonRefBufferWriterWriteBuffer<ArrayBufferWriter<byte>>(writer);
         try
         {
             for (int i = 0; i < 10; i++)
